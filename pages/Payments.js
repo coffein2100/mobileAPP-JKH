@@ -4,6 +4,17 @@ import { StyleSheet, Text, View, Image, SafeAreaView, TouchableOpacity, FlatList
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import PaymentsAdd from './FormPaymentsAdd';
+import { DatePickerInput  } from 'react-native-paper-dates';
+import {
+  // en,
+  // nl,
+  // pl,
+  enGB,
+  registerTranslation,
+} from 'react-native-paper-dates';
+import { date } from 'yup';
+
+registerTranslation('en-GB', enGB);
 
 export default function Payments({navigation}) {
 
@@ -30,13 +41,15 @@ export default function Payments({navigation}) {
 
 
     function IsNumeric(num) {
-        return ((num >=0 || num < 0)&& (parseFloat(num)==num) );
+        return ((num >0)&& (parseFloat(num)==num) );
       }
     const [addmodalWindow, setaddModalWindow] = useState(false);
     const [editmodalWindow, seteditModalWindow] = useState(false);
     const [textInputSum, setTextInputSum] = useState('');
     const [textInputNameRoom, setInputNameRoom] = useState('');
     const [textInputNameService, setInputNameService] = useState('');
+    const [inputDate, setInputDate] = useState(new Date());
+    var options = { year: 'numeric', month: 'numeric', day: 'numeric' };
 
     const [payList, setpay] = useState([
         /* {id:1, nameRooms:"test", date: '12-05-2023', service: "вывоз мусора", sum: '100.00' },
@@ -52,14 +65,20 @@ export default function Payments({navigation}) {
       }, [payList]);
 
       const addPayments = (pay) => {
+        if (inputDate!=''){
         setpay((list) => {
             pay.id = Math.random().toString();
+            pay.date = inputDate.toLocaleDateString("ru-RU");
           return [
             pay,
             ...list
           ]
         });
-        
+        setaddModalWindow(false);
+        setInputDate(new Date())}
+        else {
+          {Alert.alert('Упс! Что-то пошло не так', 'Дата обязательна к заполнению. Необходимо ввести данные повторно.')}
+        }
       }
 
       const deletePay = (payId) => { //удалить платеж
@@ -71,7 +90,7 @@ export default function Payments({navigation}) {
 
               
         if(textInputSum ==''|| !IsNumeric(textInputSum)){
-         Alert.alert('Упс! Что-то пошло не так', 'Поле не может быть пустым или заполненно неверно.Формат ввода 37.50. В поле указано '+ '"' + textInputSum + '"'  ); //проверка поля на пустоту
+         Alert.alert('Упс! Что-то пошло не так', 'Поле не может быть пустым или заполненно неверно.Формат ввода 37.50. Число должно быть больше 0. В поле указано '+ '"' + textInputSum + '"'  ); //проверка поля на пустоту
        }else{ 
        const newPay = payList.map((item)=>{
          if(item.id == payId){
@@ -138,15 +157,15 @@ export default function Payments({navigation}) {
         style={{flex:1, backgroundColor: '#fff'}}>
 
         <Modal visible={editmodalWindow}>
-        <View style={{flex:1, marginTop:30,}}>
-            <View style={{alignItems:'center'}}>
-        <TouchableOpacity style={[styles.actionIcon,{backgroundColor: '#FA8072',marginBottom:20, borderRadius:15,}]} onPress={()=> seteditModalWindow(false)}>
-        <Icon name="close" size={30} color={'#fff'} />
+        <View style={{flex:1, marginTop:30,alignItems:'center',position:'relative'}}>
+            <View style={{position:'absolute', left:0}}>
+        <TouchableOpacity style={[styles.actionIcon,{backgroundColor: '#fff', width:40, height:40,}]} onPress={()=> seteditModalWindow(false)}>
+        <Icon name="arrow-back" size={40}  color={'#B4DBA6'} />
         </TouchableOpacity>
         </View>
-          <Text style={{fontWeight: 700, fontSize: 18, color: '#7E7D7D', textAlign: 'center', marginBottom:20,}}> Редактирование платежа</Text>
-          <Text style={{fontWeight: 700, fontSize: 14, color: '#7E7D7D', textAlign: 'center', marginBottom:20,marginLeft:20, marginRight:20}}> 
-          Для редактирования заполните обязательно все поля, после чего нажмите на значок редактирования напротив той записи, которую хотите изменить
+          <Text style={{fontWeight: 700, fontSize: 18, color: '#7E7D7D', textAlign: 'center', marginBottom:20,marginTop:40}}> Редактирование платежа</Text>
+          <Text style={{fontWeight: 700, fontSize: 14, color: '#7E7D7D', textAlign: 'center', marginBottom:20,marginLeft:20, marginRight:20,width:'81%',}}> 
+          Для редактирования заполните обязательно все поля, после чего нажмите назад, далее нажмите на значок редактирования напротив той записи, которую хотите изменить
           </Text>
           
           <TextInput placeholder="Изменить сумму платежа" style={styles.input}
@@ -158,13 +177,26 @@ export default function Payments({navigation}) {
       </Modal>   
 
       <Modal visible={addmodalWindow}>
-        <View style={{flex:1, marginTop:30,}}>
-        <View style={{alignItems:'center'}}>
-        <TouchableOpacity style={[styles.actionIcon,{backgroundColor: '#FA8072',marginBottom:20, borderRadius:15,}]} onPress={()=> setaddModalWindow(false)}>
-        <Icon name="close" size={30} color={'#fff'} />
+      <View style={{flex:1, marginTop:30,alignItems:'stretch',}}>
+        <View style={{position:'absolute', left:0}}>
+        <TouchableOpacity style={[styles.actionIcon,{backgroundColor: '#fff',marginBottom:20, borderRadius:15,width:40, height:40, marginLeft:5}]} onPress={()=> setaddModalWindow(false)}>
+        <Icon name="arrow-back" size={40} color={'#B4DBA6'} />
         </TouchableOpacity>
         </View>
-          <Text style={{fontWeight: 700, fontSize: 18, color: '#7E7D7D', textAlign: 'center'}}> Добавление платежа</Text>
+          <Text style={{fontWeight: 700, fontSize: 18, color: '#7E7D7D', textAlign: 'center',marginTop:40}}> Добавление платежа</Text>
+          <View style={{width: '80%',marginLeft:'auto',marginRight:'auto', marginTop:15,marginTop:45,}}>
+          <DatePickerInput
+          label="Дата платежа"
+          value={inputDate}
+          onChange={(d) => setInputDate(d)}
+          style={{backgroundColor:'#B4DBA6'}}
+          mode="flat"
+          saveLabel="Сохранить"
+          inputMode="start"
+          presentationStyle="formSheet"
+          />
+          </View>
+          
           <PaymentsAdd addPayments={addPayments}/>
         </View>
       </Modal>
@@ -179,11 +211,11 @@ export default function Payments({navigation}) {
         </TouchableOpacity>
         </View>
 
-        <TextInput placeholder="Введите имя недвижимости" style={styles.input}
+        <TextInput placeholder="Введите имя недвижимости" style={[styles.input, {width:'95%',marginLeft:'auto',marginRight:'auto',}]}
         value={textInputNameRoom}
         onChangeText={(text)=> setInputNameRoom(text)}/>
 
-        <TextInput placeholder="Введите название услуги" style={styles.input}
+        <TextInput placeholder="Введите название услуги" style={[styles.input, {width:'95%',marginLeft:'auto',marginRight:'auto',}]}
         value={textInputNameService}
         onChangeText={(text)=> setInputNameService(text)}/>
 
@@ -276,11 +308,12 @@ const styles = StyleSheet.create({
       input:{
         borderWidth:1,
         marginTop:15,
-        padding:5,
+        padding:10,
         borderColor: 'silver',
         borderRadius:5,
         marginLeft:20,
         marginRight:20,
+        width:'80%',
       },
       dropdown: {
         margin: 20,

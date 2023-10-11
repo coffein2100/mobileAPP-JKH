@@ -1,10 +1,20 @@
 import React from 'react';
-import {useEffect, useState } from 'react';
+import {useEffect, useState,useCallback } from 'react';
 import { StyleSheet, Text, View, Image, SafeAreaView, TouchableOpacity, FlatList, Modal, TextInput, Alert} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import ChetchikiAdd from './FormChetchikiAdd';
 import { Dropdown } from 'react-native-element-dropdown';
+import { Button } from 'react-native-paper';
+import { DatePickerInput  } from 'react-native-paper-dates';
+import {
+  // en,
+  // nl,
+  // pl,
+  enGB,
+  registerTranslation,
+} from 'react-native-paper-dates';
 
+registerTranslation('en-GB', enGB);
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -31,9 +41,8 @@ export default function Chetchiki({navigation}) {
     }
   }
 
- 
-
-
+  const [inputDate, setInputDate] = useState('');
+  var options = { year: 'numeric', month: 'numeric', day: 'numeric' };
 
     const [counterList, setСounter] = useState([
         /* {id:1, nameRooms:"my", nameCounter: "Газовый счетчик", datePoverka: '12-05-2023', regCounter: "11111-01" },
@@ -52,7 +61,6 @@ export default function Chetchiki({navigation}) {
    /*  const [value, setValue] = useState(null); */
     const [addmodalWindow, setaddModalWindow] = useState(false);
     const [editmodalWindow, seteditModalWindow] = useState(false);
-    const [textInputPoverka, setTextInputPoverka] = useState('');
     const [textInputNameRoom, setInputNameRoom] = useState('');
 
 
@@ -90,12 +98,15 @@ export default function Chetchiki({navigation}) {
     const addChetchiki = (counter) => {
       setСounter((list) => {
         counter.id = Math.random().toString();
+        if (inputDate ===''){counter.datePoverka ="-"}else
+        {counter.datePoverka = inputDate.toLocaleDateString("ru-RU")};
         return [
           counter,
           ...list
         ]
       });
-      
+      setaddModalWindow(false);
+      setInputDate('');
     }
 
 //^(0[1-9]|[12][0-9]|3[01])[-](0[1-9]|1[012])[-]((19|20)\\d\\d)$
@@ -103,21 +114,22 @@ export default function Chetchiki({navigation}) {
 
     const editCounter = (counterId) => { 
 
-      const reg = new RegExp("^((2000|2400|2800|(19|2[0-9])(0[48]|[2468][048]|[13579][26]))-02-29)$" 
-      + "|^((0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[012])-(19|2[0-9])[0-9]{2})$");
+      /* const reg = new RegExp("^((2000|2400|2800|(19|2[0-9])(0[48]|[2468][048]|[13579][26]))-02-29)$" 
+      + "|^((0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[012])-(19|2[0-9])[0-9]{2})$"); */
      
-      if(textInputPoverka ==''|| !reg.test(textInputPoverka)){
-       Alert.alert('Упс! Что-то пошло не так', 'Поле не может быть пустым или заполненно неверно.Формат ввода дд-мм-гггг. В поле указано '+ '"' + textInputPoverka + '"'  ); //проверка поля на пустоту
+      if(inputDate ==''/* || !reg.test(textInputPoverka) */){
+       Alert.alert('Упс! Что-то пошло не так', 'Поле не может быть пустым. В поле указано '+ '"' + inputDate + '"'  ); //проверка поля на пустоту
      }else{ 
      const newCounter = counterList.map((item)=>{
        if(item.id == counterId){
-         return {...item, datePoverka:textInputPoverka};
+         return {...item, datePoverka:inputDate.toLocaleDateString("ru-RU")};
        }
          return item;
      });
      setСounter(newCounter);
     
-     setTextInputPoverka("");
+     
+     setInputDate('');
    
    }}
 
@@ -126,22 +138,28 @@ export default function Chetchiki({navigation}) {
         style={{flex:1, backgroundColor: '#fff'}}>
         
         <Modal visible={editmodalWindow}>
-        <View style={{flex:1, marginTop:30,}}>
-            <View style={{alignItems:'center'}}>
-        <TouchableOpacity style={[styles.actionIcon,{backgroundColor: '#FA8072',marginBottom:20, borderRadius:15,}]} onPress={()=> seteditModalWindow(false)}>
-        <Icon name="close" size={30} color={'#fff'} />
+        <View style={{flex:1, marginTop:30,alignItems:'center',}}>
+        <View style={{position:'absolute', left:0}}>
+        <TouchableOpacity style={[styles.actionIcon,{backgroundColor: '#fff', width:40, height:40,}]} onPress={()=> seteditModalWindow(false)}>
+        <Icon name="arrow-back" size={40}  color={'#B4DBA6'} />
         </TouchableOpacity>
         </View>
-          <Text style={{fontWeight: 700, fontSize: 18, color: '#7E7D7D', textAlign: 'center', marginBottom:20,}}> Редактирование счетчика</Text>
-          <Text style={{fontWeight: 700, fontSize: 14, color: '#7E7D7D', textAlign: 'center', marginBottom:20,marginLeft:20, marginRight:20}}> 
-          Для редактирования заполните обязательно все поля, после чего нажмите на значок редактирования напротив той записи, которую хотите изменить
+          <Text style={{fontWeight: 700, fontSize: 18, color: '#7E7D7D', textAlign: 'center', marginBottom:20,marginTop:40 }}> Редактирование счетчика</Text>
+          <Text style={{fontWeight: 700, fontSize: 14, color: '#7E7D7D', textAlign: 'center', marginBottom:20,marginLeft:20, marginRight:20, width:'81%'}}> 
+          Для редактирования заполните обязательно все поля, после чего нажмите назад, далее на значок редактирования напротив той записи, которую хотите изменить
           </Text>
-          
-          <TextInput placeholder="Изменить дату поверки" style={styles.input}
-          value={textInputPoverka}
-          required
-          onChangeText={(text)=> setTextInputPoverka(text)}/>
-          
+          <View style={{width: '80%',marginLeft:'auto',marginRight:'auto', marginTop:15}}>
+          <DatePickerInput
+          label="Дата поверки"
+          value={inputDate}
+          onChange={(d) => setInputDate(d)}
+          style={{backgroundColor:'#B4DBA6'}}
+          mode="flat"
+          saveLabel="Сохранить"
+          inputMode="start"
+          presentationStyle="formSheet"
+          />
+          </View>
         </View>
       </Modal>   
 
@@ -149,13 +167,25 @@ export default function Chetchiki({navigation}) {
 
 
         <Modal visible={addmodalWindow}>
-        <View style={{flex:1, marginTop:30,}}>
-        <View style={{alignItems:'center'}}>
-        <TouchableOpacity style={[styles.actionIcon,{backgroundColor: '#FA8072',marginBottom:20, borderRadius:15,}]} onPress={()=> setaddModalWindow(false)}>
-        <Icon name="close" size={30} color={'#fff'} />
+        <View style={{flex:1, marginTop:30,alignItems:'stretch',}}>
+        <View style={{position:'absolute', left:0}}>
+        <TouchableOpacity style={[styles.actionIcon,{backgroundColor: '#fff',marginBottom:20, borderRadius:15,width:40, height:40, marginLeft:5}]} onPress={()=> setaddModalWindow(false)}>
+        <Icon name="arrow-back" size={40} color={'#B4DBA6'} />
         </TouchableOpacity>
         </View>
-          <Text style={{fontWeight: 700, fontSize: 18, color: '#7E7D7D', textAlign: 'center'}}> Добавление счетчика</Text>
+          <Text style={{fontWeight: 700, fontSize: 18, color: '#7E7D7D', textAlign: 'center',marginTop:40}}> Добавление счетчика</Text>
+          <View style={{width: '80%',marginLeft:'auto',marginRight:'auto', marginTop:45, marginBottom:5}}>
+          <DatePickerInput
+          label="Дата поверки"
+          value={inputDate}
+          onChange={(d) => setInputDate(d)}
+          style={{backgroundColor:'#B4DBA6'}}
+          mode="flat"
+          saveLabel="Сохранить"
+          inputMode="start"
+          presentationStyle="formSheet"
+          />
+          </View>
           <ChetchikiAdd addChetchiki={addChetchiki}/>
         </View>
       </Modal>
@@ -172,7 +202,7 @@ export default function Chetchiki({navigation}) {
         </TouchableOpacity>
         </View>
 
-        <TextInput placeholder="Введите имя недвижимости" style={styles.input}
+        <TextInput placeholder="Введите имя недвижимости" style={[styles.input, {width:'95%',marginLeft:'auto',marginRight:'auto',}]}
         value={textInputNameRoom}
         onChangeText={(text)=> setInputNameRoom(text)}/>
        {/*  <Dropdown
@@ -292,12 +322,13 @@ const styles = StyleSheet.create({
       },
       input:{
         borderWidth:1,
-        marginTop:15,
-        padding:5,
-        borderColor: 'silver',
-        borderRadius:5,
-        marginLeft:20,
-        marginRight:20,
+            marginTop:15,
+            padding:10,
+            borderColor: 'silver',
+            borderRadius:5,
+            marginLeft:20,
+            marginRight:20,
+            width:'80%',
       },
       dropdown: {
         margin: 20,

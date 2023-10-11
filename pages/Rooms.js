@@ -4,6 +4,7 @@ import { StyleSheet, Text, View, Image, SafeAreaView, TouchableOpacity, FlatList
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import RoomAdd from './FormRoomsAdd';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Dropdown } from 'react-native-element-dropdown';
 
 export default function Rooms({navigation}) {
 
@@ -29,8 +30,25 @@ export default function Rooms({navigation}) {
     }
   }
 
+  const countReg = [
+    { label: '0', value: '0' },
+    { label: '1', value: '1' },
+    { label: '2', value: '2' },
+    { label: '3', value: '3' },
+    { label: '4', value: '4' },
+    { label: '5', value: '5' },
+    { label: '6', value: '6' },
+    { label: '7', value: '7' },
+    { label: '8', value: '8' },
+    { label: '9', value: '9' },
+    { label: '10', value: '10' },
+    { label: 'Более 10', value: 'Более 10' },
+  ];
+
+  const [value, setValue] = useState(null);
+  
 function IsNumeric(num) {
-  return ((num >=0 || num < 0)&& (parseInt(num)==num) );
+  return ((num >=0)&& (parseInt(num)==num) );
 }
 
 
@@ -50,7 +68,7 @@ function IsNumeric(num) {
       const [editmodalWindow, seteditModalWindow] = useState(false);
       /* const [textInputName, setTextInputName] = useState('');
       const [textInputAdress, setTextInputAdress] = useState(''); */
-      const [textInputRegister, setTextInputRegister] = useState('');
+      
       /* const [textInputSquare, setTextInputSquare] = useState(''); */
  
     const RoomItem = ({room}) => {
@@ -87,19 +105,19 @@ function IsNumeric(num) {
       };
 
       const editRoom = (roomId) => { 
-         if(textInputRegister === "" || !IsNumeric(textInputRegister) ){
-          Alert.alert('Упс! Что-то пошло не так', 'Поле не может быть пустым или заполненно неверно.Количество людей может быть только целым числом. В поле указано '+ '"' + textInputRegister + '"'  ); //проверка поля на пустоту
+         if(value === null /* || !IsNumeric(textInputRegister) */ ){
+          Alert.alert('Упс! Что-то пошло не так', 'Поле не может быть пустым. Для изменения количества прописанных нажмите кнопку изменить и выберите значение, после чего повторно нажмите на карандаш.' ); //проверка поля на пустоту
         }else{ 
         const newRooms = roomsList.map((item)=>{
           if(item.id == roomId){
-            return {...item, numberRegistered:textInputRegister};
+            return {...item, numberRegistered:value};
           }
             return item;
         });
         setRooms(newRooms);
         /* setTextInputName("");
         setTextInputAdress(""); */
-        setTextInputRegister("");
+        setValue(null);
        /*  setTextInputSquare("");  */ 
       }}
       
@@ -108,13 +126,14 @@ function IsNumeric(num) {
       const addRoom = (room) => {
         setRooms((list) => {
             room.id = Math.random().toString();
-            
+            room.numberRegistered=value;
           return [
             room,
             ...list
           ]
         });
-       
+        setaddModalWindow(false);
+        setValue(null);
       }
 
 
@@ -123,15 +142,15 @@ function IsNumeric(num) {
         style={{flex:1, backgroundColor: '#fff'}}>
 
         <Modal visible={editmodalWindow}>
-        <View style={{flex:1, marginTop:30,}}>
-            <View style={{alignItems:'center'}}>
-        <TouchableOpacity style={[styles.actionIcon,{backgroundColor: '#FA8072',marginBottom:20, borderRadius:15,}]} onPress={()=> seteditModalWindow(false)}>
-        <Icon name="close" size={30} color={'#fff'} />
+        <View style={{flex:1, marginTop:30,alignItems:'center',position:'relative'}}>
+            <View style={{position:'absolute', left:0}}>
+        <TouchableOpacity style={[styles.actionIcon,{backgroundColor: '#fff', width:40, height:40,}]} onPress={()=> seteditModalWindow(false)}>
+        <Icon name="arrow-back" size={40}  color={'#B4DBA6'} />
         </TouchableOpacity>
         </View>
-          <Text style={{fontWeight: 700, fontSize: 18, color: '#7E7D7D', textAlign: 'center', marginBottom:20,}}> Редактирование недвижимости</Text>
-          <Text style={{fontWeight: 700, fontSize: 14, color: '#7E7D7D', textAlign: 'center', marginBottom:20,marginLeft:20, marginRight:20}}> 
-          Для редактирования недвижимости заполните обязательно все поля, после чего нажмите на значок редактирования напротив той записи, которую хотите изменить
+          <Text style={{fontWeight: 700, fontSize: 18, color: '#7E7D7D', textAlign: 'center', marginBottom:20,marginTop:40 }}> Редактирование недвижимости</Text>
+          <Text style={{fontWeight: 700, fontSize: 14, color: '#7E7D7D', textAlign: 'center',/*  marginBottom:20,  */marginLeft:20, marginRight:20,  width:'81%',}}> 
+          Для редактирования недвижимости заполните обязательно все поля, после чего нажмите назад, далее на значок редактирования напротив той записи, которую хотите изменить
           </Text>
           {/* <TextInput placeholder="Изменить имя" style={styles.input}
           value={textInputName}
@@ -140,26 +159,65 @@ function IsNumeric(num) {
           <TextInput placeholder="Изменить адрес" style={styles.input}
           value={textInputAdress}
           onChangeText={(text)=> setTextInputAdress(text)}/> */}
-          <TextInput placeholder="Изменить количество прописанных людей" style={styles.input}
-          value={textInputRegister}
-          onChangeText={(text)=> setTextInputRegister(text)}/>
+          
           {/* <TextInput placeholder="Изменить площадь" style={styles.input}
           value={textInputSquare}
           onChangeText={(text)=> setTextInputSquare(text)}/> */}
 
+        <Dropdown
+        style={[styles.dropdown,{marginLeft:'auto', marginRight:'auto', width:'81%'}]}
+        placeholderStyle={styles.placeholderStyle}
+        selectedTextStyle={styles.selectedTextStyle}
+        inputSearchStyle={styles.inputSearchStyle}
+        iconStyle={styles.iconStyle}
+        data={countReg}
+        search
+        labelField="label"
+        valueField="value"
+        placeholder="Изменить количество прописанных"
+        searchPlaceholder="Поиск..."
+        value={value}
+        onChange={item => {
+          setValue(item.value);
+        }}
+        />
+       
+        
+      
+
         </View>
+        
+        
+
       </Modal>    
 
        
 
         <Modal visible={addmodalWindow}>
-        <View style={{flex:1, marginTop:30,}}>
-            <View style={{alignItems:'center'}}>
-        <TouchableOpacity style={[styles.actionIcon,{backgroundColor: '#FA8072',marginBottom:20, borderRadius:15,}]} onPress={()=> setaddModalWindow(false)}>
-        <Icon name="close" size={30} color={'#fff'} />
+        <View style={{flex:1, marginTop:30,alignItems:'stretch',}}>
+            <View style={{position:'absolute', left:0}}>
+        <TouchableOpacity style={[styles.actionIcon,{backgroundColor: '#fff',marginBottom:20, borderRadius:15,width:40, height:40, marginLeft:5}]} onPress={()=> setaddModalWindow(false)}>
+        <Icon name="arrow-back" size={40} color={'#B4DBA6'} />
         </TouchableOpacity>
         </View>
-          <Text style={{fontWeight: 700, fontSize: 18, color: '#7E7D7D', textAlign: 'center'}}> Добавление новой недвижимости</Text>
+          <Text style={{fontWeight: 700, fontSize: 18, color: '#7E7D7D', textAlign: 'center',marginTop:40}}> Добавление новой недвижимости</Text>
+          <Dropdown
+        style={[styles.dropdown,{marginLeft:'auto', marginRight:'auto', width:'81%'}]}
+        placeholderStyle={styles.placeholderStyle}
+        selectedTextStyle={styles.selectedTextStyle}
+        inputSearchStyle={styles.inputSearchStyle}
+        iconStyle={styles.iconStyle}
+        data={countReg}
+        search
+        labelField="label"
+        valueField="value"
+        placeholder="Указать количество прописанных"
+        searchPlaceholder="Поиск..."
+        value={value}
+        onChange={item => {
+          setValue(item.value);
+        }}
+        />
           <RoomAdd addRoom={addRoom}/>
         </View>
       </Modal>
@@ -270,6 +328,29 @@ function IsNumeric(num) {
             borderRadius:5,
             marginLeft:20,
             marginRight:20,
+            width:'80%',
           },
-          
+          dropdown: {
+            margin: 16,
+            height: 50,
+            borderBottomColor: 'gray',
+            borderBottomWidth: 0.5,
+          },
+          icon: {
+            marginRight: 5,
+          },
+          placeholderStyle: {
+            fontSize: 16,
+          },
+          selectedTextStyle: {
+            fontSize: 16,
+          },
+          iconStyle: {
+            width: 20,
+            height: 20,
+          },
+          inputSearchStyle: {
+            height: 40,
+            fontSize: 16,
+          },
     });

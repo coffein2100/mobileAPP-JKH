@@ -8,9 +8,9 @@ const SignupSchema = Yup.object().shape({
       .min(2, 'Слишком короткое название')
       .max(40, 'Слишко длинное название')
       .required('Введите название счетчика'),
-      datePoverka: Yup.date()
+      /* datePoverka: Yup.date()
       .typeError('формат ввода дд-мм-гггг')
-      .required('Введите дату поверки. Формат ввода дд-мм-гггг '),
+      .required('Введите дату поверки. Формат ввода дд-мм-гггг '), */
       regCounter: Yup.string()
       .min(2, 'Слишком короткий номер')
       .max(40, 'Слишко длинный номер')
@@ -56,7 +56,7 @@ export default function ChetchikiAdd({addChetchiki}) {
                                 <Text style={styles.errorTxt}>{errors.nameCounter}</Text>
                             )
                         }
-                      <TextInput
+                      {/* <TextInput
                       style={styles.input}
                        value={values.datePoverka}
                        multiline
@@ -66,7 +66,7 @@ export default function ChetchikiAdd({addChetchiki}) {
                             errors.datePoverka && (
                                 <Text style={styles.errorTxt}>{errors.datePoverka}</Text>
                             )
-                        }
+                        } */}
                       <TextInput
                       style={styles.input}
                        value={values.regCounter}
@@ -128,9 +128,10 @@ export default function ChetchikiAdd({addChetchiki}) {
       borderRadius:5
   },
   form:{
-    margin:20,
-    justifyContent:'center',
-    width:'90%',
+    marginTop:20,
+    width:'80%',
+    marginLeft:'auto',
+    marginRight:'auto',
     
   },
   });

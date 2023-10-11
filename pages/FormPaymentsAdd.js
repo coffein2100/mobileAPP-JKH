@@ -8,9 +8,9 @@ const SignupSchema = Yup.object().shape({
       .min(2, 'Слишком короткое название')
       .max(40, 'Слишко длинное название')
       .required('Введите название услуги'),
-      date: Yup.date()
+      /* date: Yup.date()
       .typeError('формат ввода дд-мм-гггг')
-      .required('Введите дату платежа. Формат ввода дд-мм-гггг'),    
+      .required('Введите дату платежа. Формат ввода дд-мм-гггг'), */    
       nameRooms:Yup.string()
       .min(2, 'Слишком короткое название')
       .max(50, 'Слишко длинное название')
@@ -46,7 +46,7 @@ export default function PaymentsAdd({addPayments}) {
                                 <Text style={styles.errorTxt}>{errors.nameRooms}</Text>
                             )
                         }
-                      <TextInput
+                      {/* <TextInput
                       style={styles.input}
                       value={values.date}
                        placeholder='введите дату платежа'
@@ -56,7 +56,7 @@ export default function PaymentsAdd({addPayments}) {
                             errors.date && (
                                 <Text style={styles.errorTxt}>{errors.date}</Text>
                             )
-                        }
+                        } */}
                       <TextInput
                       style={styles.input}
                        value={values.service}
@@ -120,9 +120,9 @@ export default function PaymentsAdd({addPayments}) {
       borderRadius:5
   },
   form:{
-    margin:20,
-    justifyContent:'center',
-    width:'90%',
-    
+    marginTop:20,
+    width:'80%',
+    marginLeft:'auto',
+    marginRight:'auto',
   },
   });
