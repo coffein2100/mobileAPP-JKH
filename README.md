@@ -2,4 +2,5 @@
 Приложение создано на базе React native.
 Для работы готового пакета требуется установка react native и сторонних модулей, указанных в импорте
 
-Собранный APK файл здесь: https://disk.yandex.ru/d/stq4tTX4ta1PHQ
+Собранный APK файл здесь: [https://disk.yandex.ru/d/stq4tTX4ta1PHQ
+](https://apps.rustore.ru/app/com.coffein_letter.mojzhkh)https://apps.rustore.ru/app/com.coffein_letter.mojzhkh
